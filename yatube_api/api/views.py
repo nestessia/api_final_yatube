@@ -3,7 +3,6 @@ from rest_framework.generics import get_object_or_404
 from rest_framework.mixins import CreateModelMixin, ListModelMixin
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.viewsets import GenericViewSet
-from django.core.exceptions import PermissionDenied
 from .permissions import IsOwnerOrReadOnly
 from .serializers import GroupSerializer, PostSerializer, CommentSerializer, \
     FollowSerializer
@@ -41,16 +40,6 @@ class CommentViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         return self.get_post().comments.select_related('author')
 
-    def perform_update(self, serializer):
-        if serializer.instance.author != self.request.user:
-            raise PermissionDenied('Изменение чужого контента запрещено!')
-        super(CommentViewSet, self).perform_update(serializer)
-
-    def perform_destroy(self, instance):
-        if instance.author != self.request.user:
-            raise PermissionDenied('Удаление чужого контента запрещено.')
-        instance.delete()
-
 
 class FollowViewSet(CreateModelMixin, ListModelMixin, GenericViewSet):
     serializer_class = FollowSerializer
@@ -61,4 +50,4 @@ class FollowViewSet(CreateModelMixin, ListModelMixin, GenericViewSet):
         serializer.save(user=self.request.user)
 
     def get_queryset(self):
-        return self.request.user.follower.all().select_related('user')
+        return self.request.user.follower.select_related('user')
