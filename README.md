@@ -1,5 +1,3 @@
-# api_final
-api final
+# API cайта
 
-Запросы к публикациям: 
 
